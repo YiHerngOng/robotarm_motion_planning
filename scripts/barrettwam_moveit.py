@@ -54,25 +54,38 @@ class robot(object):
 		self.disp_traj.trajectory.append(self.plan)
 		self.disp_traj_publisher.publish(self.disp_traj)
 
-base_pose = [0.6972,0,0.82,0,90,0] 
+# base_pose = [0.6972,0,0.82,0,90,0] 
+base_pose = [0.6972,0,0.86,0,90,0] 
 
-def sampling_xy_Poses(increment, num, axis): # for x y
+
+def sampling_x_Poses(increment, num): # for x 
 	# sampling x (y axis in rviz)
 	global base_pose
-	if axis == "x":
-		position = 1
-	if axis == "y":
-		position = 2
+
 	poses = []
 	temp = base_pose[:]
 	for i in range(num/2):
-		temp[position] -= increment
+		temp[1] -= increment
 		temp1 = temp[:]
 		poses.append(temp1)
 
 	temp = base_pose[:]
 	for j in range(num/2):
-		temp[position] += increment
+		temp[1] += increment
+		temp1 = temp[:]
+		poses.append(temp1)
+	return poses
+
+def sampling_y_Poses(increment, num): # for y
+	global base_pose
+	poses = [] 
+	temp = base_pose[:]
+	temp[2] -= increment
+	temp1 = temp[:]
+	poses.append(temp1)
+	temp = base_pose[:]
+	for i in range(num-1):
+		temp[2] += increment
 		temp1 = temp[:]
 		poses.append(temp1)
 	return poses
@@ -91,17 +104,19 @@ def sampling_rw_Poses(increment, num, axis): # for roll and yaw
 	global base_pose
 	if axis == "r":
 		position = 3
-	if axis == "w":
-		position = 5
+	# if axis == "w":
+	# 	position = 5
 	poses = []
 	temp = base_pose[:]
 	for i in range(num/2):
-		temp[position] -= increment
+		temp[3] -= increment
+		temp[5] -= increment
 		temp1 = temp[:]
 		poses.append(temp1)
 	temp = base_pose[:]
 	for j in range(num/2):
-		temp[position] += increment
+		temp[3] += increment
+		temp[5] += increment
 		temp1 = temp[:]
 		poses.append(temp1)
 	return poses
@@ -125,18 +140,41 @@ def sampling_p_Poses(increment, num): # for pitch only
 
 
 if __name__ == '__main__':
-	x = sampling_xy_Poses(0.02, 6, "x")
-	y = sampling_xy_Poses(0.02, 4, "y")
+	x = sampling_x_Poses(0.02, 6)
+	y = sampling_y_Poses(0.02, 4)
 	z = sampling_z_Poses(0.02, 4)
 
 	r = sampling_rw_Poses(15, 6, "r")
-	w = sampling_rw_Poses(15, 4, "w")
-	p = sampling_p_Poses(15, 4)
+	# w = sampling_rw_Poses(15, 4, "w")
+	# p = sampling_p_Poses(15, 4)
 
 	Robot = robot("barrett_wam")
 	Robot.planner_type()
-	Robot.move_to_Goal(x[2])
+	Robot.move_to_Goal(base_pose)
+	# for i in range(len(x)):
+	# 	rospy.loginfo("Planning and executing x_{}".format(i))
+	# 	Robot.move_to_Goal(x[i])
+	rospy.sleep(2)
+	# for j in range(len(y)):
+	# 	rospy.loginfo("Planning and executing y_{}".format(j))
+	# 	rospy.loginfo("Current Y pose {}".format(y[j]))
+	# 	Robot.move_to_Goal(y[j])	
 
+	# for k in range(len(z)):
+	# 	rospy.loginfo("Planning and executing z_{}".format(k))
+	# 	Robot.move_to_Goal(z[k])
+
+	for l in range(len(r)):
+		rospy.loginfo("Planning and executing r_{}".format(l))
+		Robot.move_to_Goal(r[l])
+
+	# for m in range(len(p)):
+	# 	rospy.loginfo("Planning and executing p_{}".format(m))
+	# 	Robot.move_to_Goal(p[m])
+
+	# for n in range(len(w)):
+	# 	rospy.loginfo("Planning and executing w_{}".format(n))
+	# 	Robot.move_to_Goal(w[n])
 	# pdb.set_trace()
 
 	# moveit_commander.roscpp_initialize(sys.argv)
