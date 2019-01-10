@@ -9,7 +9,7 @@ import std_msgs.msg
 import geometry_msgs.msg
 import pdb
 import tf, math
-
+from sensor_msgs.msg import JointState
 # base pose : position [0.6972, 0, 0.8] orientation [0, 90, 0]
 # vary poses based on the base pose. 
 
@@ -54,7 +54,19 @@ class robot(object):
 		self.disp_traj.trajectory.append(self.plan)
 		self.disp_traj_publisher.publish(self.disp_traj)
 
-# base_pose = [0.6972,0,0.82,-90,90,-90] 
+	def move_to_Joint(self, joint_states):
+		joint_goal = JointState()
+		joint_goal.position = joint_states
+		self.group.set_joint_value_target(joint_goal)
+		self.plan = self.group.plan()
+		self.group.set_planning_time(10)
+		self.group.go(wait=True)
+		self.group.execute(self.plan, wait=True)
+		self.group.stop()
+		self.group.clear_pose_targets()
+		rospy.sleep(2)
+
+# base_pose = [0.7972,0,0.82,-90,90,-90] 
 base_pose = [0.7972,0,0.86,-90,90,-90] 
 
 
@@ -171,55 +183,62 @@ if __name__ == '__main__':
 	w = sampling_w_Poses(15, 4)
 	p = sampling_p_Poses(15, 4)
 
-	Robot = robot("barrett_wam")
-	Robot.planner_type()
-	file_base = open("joint_angles_base.csv","wb")
-	Robot.move_to_Goal(base_pose)
-	write_file(file_base, Robot)
-	file_base.close()
+	# Robot = robot("barrett_wam")
+	# Robot.planner_type()
 
-	rospy.sleep(2)
+	## Read and move to joint goals
+	file_base = open("joint_angles_base.csv","rb")
+	file_base.readline()
 
-	file_x = open("joint_angles_x.csv","wb")
-	for i in range(len(x)):
-		rospy.loginfo("Planning and executing x_{}".format(i))
-		Robot.move_to_Goal(x[i])
-		write_file(file_x, Robot)
-	file_x.close()
 
-	file_y = open("joint_angles_y.csv","wb")
-	for j in range(len(y)):
-		rospy.loginfo("Planning and executing y_{}".format(j))
-		rospy.loginfo("Current Y pose {}".format(y[j]))
-		Robot.move_to_Goal(y[j])
-		write_file(file_y, Robot)
-	file_y.close()	
+	# file_base = open("joint_angles_base.csv","wb")
+	# Robot.move_to_Goal(base_pose)
+	# write_file(file_base, Robot)
+	# file_base.close()
 
-	file_z = open("joint_angles_z.csv","wb")
-	for k in range(len(z)):
-		rospy.loginfo("Planning and executing z_{}".format(k))
-		Robot.move_to_Goal(z[k])
-		write_file(file_z, Robot)
-	file_z.close()
+	# rospy.sleep(2)
 
-	file_r = open("joint_angles_r.csv","wb")
-	for l in range(len(r)):
-		rospy.loginfo("Planning and executing r_{}".format(l))
-		Robot.move_to_Goal(r[l])
-		write_file(file_r, Robot)
-	file_r.close()
+	# file_x = open("joint_angles_x.csv","wb")
+	# for i in range(len(x)):
+	# 	rospy.loginfo("Planning and executing x_{}".format(i))
+	# 	Robot.move_to_Goal(x[i])
+	# 	write_file(file_x, Robot)
+	# file_x.close()
 
-	file_p = open("joint_angles_p.csv","wb")
-	for m in range(len(p)):
-		rospy.loginfo("Planning and executing p_{}".format(m))
-		Robot.move_to_Goal(p[m])
-		write_file(file_p, Robot)
-	file_p.close()
+	# file_y = open("joint_angles_y.csv","wb")
+	# for j in range(len(y)):
+	# 	rospy.loginfo("Planning and executing y_{}".format(j))
+	# 	rospy.loginfo("Current Y pose {}".format(y[j]))
+	# 	Robot.move_to_Goal(y[j])
+	# 	write_file(file_y, Robot)
+	# file_y.close()	
 
-	file_w = open("joint_angles_w.csv","wb")
-	for n in range(len(w)):
-		rospy.loginfo("Planning and executing w_{}".format(n))
-		Robot.move_to_Goal(w[n])
-		write_file(file_w, Robot)
-	file_w.close()
+	# file_z = open("joint_angles_z.csv","wb")
+	# for k in range(len(z)):
+	# 	rospy.loginfo("Planning and executing z_{}".format(k))
+	# 	Robot.move_to_Goal(z[k])
+	# 	write_file(file_z, Robot)
+	# file_z.close()
+
+	# file_r = open("joint_angles_r.csv","wb")
+	# for l in range(len(r)):
+	# 	rospy.loginfo("Planning and executing r_{}".format(l))
+	# 	Robot.move_to_Goal(r[l])
+	# 	write_file(file_r, Robot)
+	# file_r.close()
+
+	# file_p = open("joint_angles_p.csv","wb")
+	# for m in range(len(p)):
+	# 	rospy.loginfo("Planning and executing p_{}".format(m))
+	# 	Robot.move_to_Goal(p[m])
+	# 	write_file(file_p, Robot)
+	# file_p.close()
+
+	# file_w = open("joint_angles_w.csv","wb")
+	# for n in range(len(w)):
+	# 	rospy.loginfo("Planning and executing w_{}".format(n))
+	# 	Robot.move_to_Goal(w[n])
+	# 	write_file(file_w, Robot)
+	# file_w.close()
 	# pdb.set_trace()
+	
