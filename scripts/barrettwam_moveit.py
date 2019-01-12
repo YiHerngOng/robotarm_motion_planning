@@ -57,7 +57,7 @@ class robot(object):
 	def move_to_Joint(self, joint_states):
 		joint_goal = JointState()
 		joint_goal.position = joint_states
-		self.group.set_joint_value_target(joint_goal)
+		self.group.set_joint_value_target(joint_goal.position)
 		self.plan = self.group.plan()
 		self.group.set_planning_time(10)
 		self.group.go(wait=True)
@@ -67,7 +67,7 @@ class robot(object):
 		rospy.sleep(2)
 
 # base_pose = [0.7972,0,0.82,-90,90,-90] 
-base_pose = [0.7972,0,0.86,-90,90,-90] 
+base_pose = [0.7972,0,0.84,-90,90,-90] 
 
 
 def sampling_x_Poses(increment, num): # for x 
@@ -118,14 +118,14 @@ def sampling_r_Poses(increment, num): # for roll
 	temp = base_pose[:]
 	for i in range(num/2):
 		if i > 0:
-			temp[2] += 0.01
+			temp[2] += 0.02
 		temp[4] -= increment
 		temp1 = temp[:]
 		poses.append(temp1)
 	temp = base_pose[:]
 	for j in range(num/2):
 		if j > 0:
-			temp[2] += 0.02
+			temp[2] += 0.03
 		temp[4] += increment
 		temp1 = temp[:]
 		poses.append(temp1)
@@ -174,6 +174,7 @@ def write_file(file, Robot):
 			print "yes"
 			file.write("f")
 		file.write("\n")
+
 if __name__ == '__main__':
 	x = sampling_x_Poses(0.02, 6)
 	y = sampling_y_Poses(0.02, 4)
@@ -183,20 +184,28 @@ if __name__ == '__main__':
 	w = sampling_w_Poses(15, 4)
 	p = sampling_p_Poses(15, 4)
 
-	# Robot = robot("barrett_wam")
-	# Robot.planner_type()
+	Robot = robot("barrett_wam")
+	Robot.planner_type()
 
 	## Read and move to joint goals
-	file_base = open("joint_angles_base.csv","rb")
-	file_base.readline()
+	# arr = []
+	# file_base = open("joint_angles_x_1.csv","rb")
+	# for i in file_base.readlines():
+	# 	jn = i.rstrip('\n').split(',')
+	# 	for j in range(0,7):
+	# 		jn[j] = float(jn[j])
+	# 	arr.append(jn[0:7])
 
+	# for k in range(len(arr)):
+	# 	rospy.loginfo("moving to joint {}".format(k))
+	# 	Robot.move_to_Joint(arr[k])
 
-	# file_base = open("joint_angles_base.csv","wb")
-	# Robot.move_to_Goal(base_pose)
+	# file_base = open("joint_angles_base_5_2.csv","wb")
+	Robot.move_to_Goal(base_pose)
 	# write_file(file_base, Robot)
 	# file_base.close()
 
-	# rospy.sleep(2)
+	rospy.sleep(2)
 
 	# file_x = open("joint_angles_x.csv","wb")
 	# for i in range(len(x)):
@@ -220,12 +229,12 @@ if __name__ == '__main__':
 	# 	write_file(file_z, Robot)
 	# file_z.close()
 
-	# file_r = open("joint_angles_r.csv","wb")
-	# for l in range(len(r)):
-	# 	rospy.loginfo("Planning and executing r_{}".format(l))
-	# 	Robot.move_to_Goal(r[l])
-	# 	write_file(file_r, Robot)
-	# file_r.close()
+	file_r = open("joint_angles_r.csv","wb")
+	for l in range(len(r)):
+		rospy.loginfo("Planning and executing r_{}".format(l))
+		Robot.move_to_Goal(r[l])
+		write_file(file_r, Robot)
+	file_r.close()
 
 	# file_p = open("joint_angles_p.csv","wb")
 	# for m in range(len(p)):
